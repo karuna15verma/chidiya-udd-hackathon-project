@@ -23,6 +23,7 @@ class App extends React.Component {
       openDialog: false,
       setIntervalAction: false,
       isImage: false,
+      isUserClick: false,
     };
   }
 
@@ -38,7 +39,6 @@ class App extends React.Component {
 
   computerPlayer = () => {
     const random = Math.floor(Math.random() * this.state.autoPlayerData.length);
-    console.log(random, this.state.autoPlayerData[random]);
     const randomData = (random, this.state.autoPlayerData[random]);
     console.log(randomData);
     this.setState({ autoPlayerData: randomData }, () => {
@@ -78,6 +78,7 @@ class App extends React.Component {
               : this.state.firstPlayerScore
             : this.state.firstPlayerScore,
         setIntervalAction: false,
+        isUserClick: true,
       },
       () => {
         this.setState({ firstPlayerSelected: true });
@@ -124,6 +125,8 @@ class App extends React.Component {
     this.setState({ startGame: true }, () => {
       if (this.state.playerType === "computer") {
         setTimeout(this.computerPlayer, 1000);
+      } else {
+        setTimeout(this.secondPlayerNotFlyFunction, 2000);
       }
     });
   };
@@ -190,18 +193,12 @@ class App extends React.Component {
   };
 
   render() {
-    // setInterval(this.setImage, 10000);
     if (this.state.userType === "computer") {
       setInterval(this.computerPlayer(), 2000);
     }
     if (this.state.isImage === false) {
       this.setImage();
     }
-    // if (this.state.setIntervalAction) {
-    //   this.intervalID = setInterval(this.setImage, 20000);
-    // } else {
-    //   clearInterval(this.intervalID);
-    // }
     return (
       <div
         style={{
