@@ -21,28 +21,22 @@ class App extends React.Component {
       autoPlayerData: [true, false, true, false, true, false, true, false, true, false],
       winnerMessage: "",
       openDialog: false,
-      setIntervalAction: true,
+      setIntervalAction: false,
+      isImage: false,
     };
   }
 
   componentWillMount() {
-    console.log(this.state.images);
-    const random = Math.floor(Math.random() * this.state.images.length);
-    console.log(random, this.state.images[random]);
-    const randomData = (random, this.state.images[random]);
-    this.setState({ randomImage: randomData });
+    this.setImage();
   }
 
   setImage = () => {
-    console.log("setimage call");
     const random = Math.floor(Math.random() * this.state.images.length);
-    console.log(random, this.state.images[random]);
     const randomData = (random, this.state.images[random]);
-    this.setState({ randomImage: randomData, firstPlayerSelected: false, secondPlayerSelected: false });
+    this.setState({ isImage: true, randomImage: randomData, firstPlayerSelected: false, secondPlayerSelected: false });
   };
 
   computerPlayer = () => {
-    alert("computer start");
     const random = Math.floor(Math.random() * this.state.autoPlayerData.length);
     console.log(random, this.state.autoPlayerData[random]);
     const randomData = (random, this.state.autoPlayerData[random]);
@@ -69,7 +63,7 @@ class App extends React.Component {
       },
       () => {
         this.setState({ firstPlayerSelected: true });
-        setTimeout(this.setImage, 2000);
+        setTimeout(this.setImage, 1000);
       }
     );
   };
@@ -87,7 +81,7 @@ class App extends React.Component {
       },
       () => {
         this.setState({ firstPlayerSelected: true });
-        setTimeout(this.setImage, 2000);
+        setTimeout(this.setImage, 1000);
       }
     );
   };
@@ -105,7 +99,7 @@ class App extends React.Component {
       },
       () => {
         this.setState({ secondPlayerSelected: true });
-        setTimeout(this.setImage, 2000);
+        setTimeout(this.setImage, 1000);
       }
     );
   };
@@ -136,23 +130,34 @@ class App extends React.Component {
 
   getWinnerFunction = () => {
     this.setState({ openDialog: true }, () => {
-      if (this.state.firstPlayerScore > this.state.secondPlayerScore) {
-        this.setState({
-          winnerMessage:
-            this.state.playerType === "user" ? `${this.state.firstPlayerName}! Win the game` : `Computer! Win the game`,
-        });
-      }
-      if (this.state.firstPlayerScore == this.state.secondPlayerScore) {
-        this.setState({
-          winnerMessage: `No one Win the game! both user's score are same`,
-        });
+      if (this.state.playerType === "user") {
+        if (this.state.firstPlayerScore > this.state.secondPlayerScore) {
+          this.setState({
+            winnerMessage: `${this.state.firstPlayerName}! Win the game`,
+          });
+        } else if (this.state.firstPlayerScore == this.state.secondPlayerScore) {
+          this.setState({
+            winnerMessage: `No one Win the game! both user's score are same`,
+          });
+        } else if (this.state.firstPlayerScore < this.state.secondPlayerScore) {
+          this.setState({
+            winnerMessage: `${this.state.secondPlayerName}! Win the game`,
+          });
+        }
       } else {
-        this.setState({
-          winnerMessage:
-            this.state.playerType === "user"
-              ? `${this.state.secondPlayerName}! Win the game`
-              : `Computer! Win the game`,
-        });
+        if (this.state.firstPlayerScore > this.state.secondPlayerScore) {
+          this.setState({
+            winnerMessage: `computer! Win the game`,
+          });
+        } else if (this.state.firstPlayerScore == this.state.secondPlayerScore) {
+          this.setState({
+            winnerMessage: `No one Win the game! both user's score are same`,
+          });
+        } else if (this.state.firstPlayerScore < this.state.secondPlayerScore) {
+          this.setState({
+            winnerMessage: `${this.state.secondPlayerName}! Win the game`,
+          });
+        }
       }
     });
   };
@@ -163,7 +168,6 @@ class App extends React.Component {
       startGame: false,
       playerType: "",
       images: ImagesData,
-      randomImage: "",
       firstPlayerScore: 0,
       secondPlayerScore: 0,
       firstPlayerName: "",
@@ -187,12 +191,17 @@ class App extends React.Component {
 
   render() {
     // setInterval(this.setImage, 10000);
-    if (this.state.user)
-      if (this.state.setIntervalAction) {
-        this.intervalID = setInterval(this.setImage, 5000);
-      } else {
-        clearInterval(this.intervalID);
-      }
+    if (this.state.userType === "computer") {
+      setInterval(this.computerPlayer(), 2000);
+    }
+    if (this.state.isImage === false) {
+      this.setImage();
+    }
+    // if (this.state.setIntervalAction) {
+    //   this.intervalID = setInterval(this.setImage, 20000);
+    // } else {
+    //   clearInterval(this.intervalID);
+    // }
     return (
       <div
         style={{
