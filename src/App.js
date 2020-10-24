@@ -2,6 +2,7 @@ import React from "react";
 import "./App.css";
 import ImagesData from "./Components/ImagesData";
 import { TextField, Button } from "@material-ui/core";
+import DialogBox from "./Components/DialogBox";
 
 class App extends React.Component {
   constructor(props) {
@@ -17,7 +18,10 @@ class App extends React.Component {
       secondPlayerName: "",
       firstPlayerSelected: false,
       secondPlayerSelected: false,
-      autoPlayerData: [true, false],
+      autoPlayerData: [true, false, true, false, true, false, true, false, true, false],
+      winnerMessage: "",
+      openDialog: false,
+      setIntervalAction: true,
     };
   }
 
@@ -38,10 +42,14 @@ class App extends React.Component {
   };
 
   computerPlayer = () => {
+    alert("computer start");
     const random = Math.floor(Math.random() * this.state.autoPlayerData.length);
     console.log(random, this.state.autoPlayerData[random]);
     const randomData = (random, this.state.autoPlayerData[random]);
-    this.setState({ autoPlayerData: randomData });
+    console.log(randomData);
+    this.setState({ autoPlayerData: randomData }, () => {
+      this.firstPlayerFlyFunction();
+    });
   };
 
   firstPlayerFlyFunction = () => {
@@ -57,10 +65,11 @@ class App extends React.Component {
             : this.state.autoPlayerData === false
             ? this.state.firstPlayerScore
             : this.state.firstPlayerScore + 1,
+        setIntervalAction: false,
       },
       () => {
         this.setState({ firstPlayerSelected: true });
-        setTimeout(this.setImage, 1000);
+        setTimeout(this.setImage, 2000);
       }
     );
   };
@@ -74,10 +83,11 @@ class App extends React.Component {
               ? this.state.firstPlayerScore + 1
               : this.state.firstPlayerScore
             : this.state.firstPlayerScore,
+        setIntervalAction: false,
       },
       () => {
         this.setState({ firstPlayerSelected: true });
-        setTimeout(this.setImage, 1000);
+        setTimeout(this.setImage, 2000);
       }
     );
   };
@@ -91,10 +101,11 @@ class App extends React.Component {
               ? this.state.secondPlayerScore + 1
               : this.state.secondPlayerScore
             : this.state.secondPlayerScore,
+        setIntervalAction: false,
       },
       () => {
         this.setState({ secondPlayerSelected: true });
-        setTimeout(this.setImage, 1000);
+        setTimeout(this.setImage, 2000);
       }
     );
   };
@@ -123,6 +134,47 @@ class App extends React.Component {
     });
   };
 
+  getWinnerFunction = () => {
+    this.setState({ openDialog: true }, () => {
+      if (this.state.firstPlayerScore > this.state.secondPlayerScore) {
+        this.setState({
+          winnerMessage:
+            this.state.playerType === "user" ? `${this.state.firstPlayerName}! Win the game` : `Computer! Win the game`,
+        });
+      }
+      if (this.state.firstPlayerScore == this.state.secondPlayerScore) {
+        this.setState({
+          winnerMessage: `No one Win the game! both user's score are same`,
+        });
+      } else {
+        this.setState({
+          winnerMessage:
+            this.state.playerType === "user"
+              ? `${this.state.secondPlayerName}! Win the game`
+              : `Computer! Win the game`,
+        });
+      }
+    });
+  };
+
+  closeDialogFunction = () => {
+    this.setState({
+      openDialog: false,
+      startGame: false,
+      playerType: "",
+      images: ImagesData,
+      randomImage: "",
+      firstPlayerScore: 0,
+      secondPlayerScore: 0,
+      firstPlayerName: "",
+      secondPlayerName: "",
+      firstPlayerSelected: false,
+      secondPlayerSelected: false,
+      winnerMessage: "",
+      setIntervalAction: true,
+    });
+  };
+
   selectPlayerType = (value) => {
     this.setState({ playerType: value });
   };
@@ -134,12 +186,13 @@ class App extends React.Component {
   };
 
   render() {
-    console.log(this.state.autoPlayerData);
-    //
     // setInterval(this.setImage, 10000);
-    // if (this.state.firstPlayerSelected === false && this.state.secondPlayerSelected === false) {
-    //   setTimeout(this.setImage, 5000);
-    // }
+    if (this.state.user)
+      if (this.state.setIntervalAction) {
+        this.intervalID = setInterval(this.setImage, 5000);
+      } else {
+        clearInterval(this.intervalID);
+      }
     return (
       <div
         style={{
@@ -169,7 +222,7 @@ class App extends React.Component {
                       width: "130px",
                     }}
                     onClick={() =>
-                      this.state.playerType === "user" ? this.firstPlayerFlyFunction() : this.computerPlayer()
+                      this.state.playerType === "user" ? this.firstPlayerNotFlyFunction() : this.computerPlayer()
                     }
                   >
                     <span style={{ color: "white", fontSize: "30px", display: "flex", textAlign: "center" }}>
@@ -201,16 +254,10 @@ class App extends React.Component {
                 </span>
               </>
             ) : (
-              ""
-            )}
-            {/* <div style={{ display: "flex", justifyContent: "center", flexDirection: "column", alignItems: "center" }}>
-              <span style={{ padding: "10px", display: "flex", textAlign: "center" }}>
-                Hello, {this.state.name}! Play the game carefully and get the highest score
-              </span>
               <span style={{ color: "white", fontSize: "20px", fontWeight: 600, marginTop: "5%", marginBottom: "5%" }}>
-                Score:-{this.state.score}
+                Computer Score: {this.state.firstPlayerScore}
               </span>
-            </div> */}
+            )}
             <div style={{ height: "200px", width: "200px", display: "flex", justifyContent: "center" }}>
               <img src={this.state.randomImage.imageUrl} alt="" style={{ height: "150px", width: "150px" }} />
             </div>
@@ -250,6 +297,14 @@ class App extends React.Component {
                 <span style={{ color: "white", fontSize: "30px" }}>Fly</span>
               </div>
             </div>
+            <Button
+              onClick={() => this.getWinnerFunction()}
+              style={{ marginTop: "10%", color: "blue", backgroundColor: "white", marginTop: "3%" }}
+              variant="contained"
+              color="primary"
+            >
+              Stop the Game
+            </Button>
           </>
         ) : (
           <div
@@ -321,13 +376,27 @@ class App extends React.Component {
                     style={{ color: "white" }}
                     id="outlined-basic"
                     onChange={this.handleChange("name")}
-                    label="Name"
+                    label="Your Name"
                     value={this.state.name}
                     variant="outlined"
                   />
                 )}
                 <Button
-                  onClick={() => this.startGameFunction()}
+                  onClick={() => {
+                    if (this.state.playerType === "user") {
+                      if (this.state.firstPlayerName !== "" && this.state.secondPlayerName !== "") {
+                        this.startGameFunction();
+                      } else {
+                        alert("fill the name");
+                      }
+                    } else {
+                      if (this.state.name !== "") {
+                        this.startGameFunction();
+                      } else {
+                        alert("fill the name");
+                      }
+                    }
+                  }}
                   style={{ color: "white" }}
                   variant="contained"
                   color="primary"
@@ -337,6 +406,11 @@ class App extends React.Component {
               </>
             )}
           </div>
+        )}
+        {this.state.openDialog ? (
+          <DialogBox closeDialogFunction={this.closeDialogFunction} winnerMessage={this.state.winnerMessage} />
+        ) : (
+          ""
         )}
       </div>
     );
